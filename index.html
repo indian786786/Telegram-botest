@@ -1,36 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>SSC Practice MCQ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
+body{
   background:#0b1c3a;
   color:white;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
   padding:20px;
 }
-button, input {
+input, button{
   width:100%;
   padding:14px;
   margin-top:10px;
   font-size:16px;
 }
-.option {
-  border:1px solid #444;
+.option{
+  border:1px solid #555;
   padding:12px;
   margin-top:10px;
   cursor:pointer;
+  border-radius:6px;
 }
-.correct { background:#1f7a1f; }
-.wrong { background:#7a1f1f; }
-#explanation {
+.correct{ background:#1f7a1f; }
+.wrong{ background:#7a1f1f; }
+#explanation{
   margin-top:15px;
   background:#111;
   padding:12px;
   display:none;
+  border-left:4px solid #3aa0ff;
 }
 </style>
 </head>
@@ -40,8 +42,8 @@ button, input {
 <h2>SSC Practice MCQ</h2>
 
 <input id="topic" placeholder="Enter topic (e.g. Lodi dynasty)">
-<button onclick="start()">Start</button>
-<button onclick="next()">Skip / Next</button>
+<button onclick="startQuiz()">Start</button>
+<button onclick="nextQuestion()">Skip / Next</button>
 
 <div id="quiz"></div>
 <div id="explanation"></div>
@@ -51,127 +53,81 @@ let questions = [];
 let index = 0;
 let answered = false;
 
-async function start() {
+async function startQuiz(){
   index = 0;
   document.getElementById("quiz").innerHTML = "Loading questions...";
-  const topic = document.getElementById("topic").value;
+  document.getElementById("explanation").style.display="none";
 
-  const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topic })
-  });
-
-  questions = await res.json();
-  show();
-}
-
-function show() {
-  answered = false;
-  const q = questions[index];
-  if (!q) {
-    document.getElementById("quiz").innerHTML = "Quiz completed ✔";
+  const topic = document.getElementById("topic").value.trim();
+  if(!topic){
+    document.getElementById("quiz").innerHTML = "❌ Please enter a topic";
     return;
   }
 
-  const quiz = document.getElementById("quiz");
-  quiz.innerHTML = `<h3>Q${index+1}. ${q.question}</h3>`;
+  try{
+    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ topic })
+    });
 
-  q.options.forEach((opt,i)=>{
-    const div = document.createElement("div");
-    div.className="option";
-    div.innerText=opt;
-    div.onclick=()=>check(div,i);
-    quiz.appendChild(div);
-  });
-}
+    questions = await res.json();
+    showQuestion();
 
-function check(div,i){
-  if(answered) return;
-  answered=true;
-
-  const q=questions[index];
-  const all=document.querySelectorAll(".option");
-  all.forEach(o=>o.onclick=null);
-
-  if(i===q.answer){
-    div.classList.add("correct");
-  } else {
-    div.classList.add("wrong");
-    all[q.answer].classList.add("correct");
-  }
-
-  const ex=document.getElementById("explanation");
-  ex.innerHTML="<b>Explanation:</b> "+q.explanation;
-  ex.style.display="block";
-}
-
-function next(){
-  index++;
-  document.getElementById("explanation").style.display="none";
-  show();
-}
-</script>
-
-</body>
-</html>
-  } catch (e) {
-    document.getElementById("quiz").innerHTML = "❌ Error loading questions";
+  }catch(e){
+    document.getElementById("quiz").innerHTML="❌ Error loading questions";
     console.error(e);
   }
 }
 
-function showQuestion() {
-  answered = false;
-  const quiz = document.getElementById("quiz");
-  const exp = document.getElementById("explanation");
-  exp.classList.add("hidden");
+function showQuestion(){
+  answered=false;
+  const quiz=document.getElementById("quiz");
+  const exp=document.getElementById("explanation");
+  exp.style.display="none";
 
-  if (index >= questions.length) {
-    quiz.innerHTML = "✅ Quiz completed";
+  if(index >= questions.length){
+    quiz.innerHTML="✅ Quiz completed";
     return;
   }
 
-  const q = questions[index];
-  quiz.innerHTML = `<h3>Q${index + 1}. ${q.question}</h3>`;
+  const q=questions[index];
+  quiz.innerHTML=`<h3>Q${index+1}. ${q.question}</h3>`;
 
-  q.options.forEach((opt, i) => {
-    const div = document.createElement("div");
-    div.className = "option";
-    div.innerText = opt;
-    div.onclick = () => checkAnswer(div, i);
+  q.options.forEach((opt,i)=>{
+    const div=document.createElement("div");
+    div.className="option";
+    div.innerText=opt;
+    div.onclick=()=>checkAnswer(div,i);
     quiz.appendChild(div);
   });
 }
 
-function checkAnswer(div, i) {
-  if (answered) return;
-  answered = true;
+function checkAnswer(div,i){
+  if(answered) return;
+  answered=true;
 
-  const q = questions[index];
-  const options = document.querySelectorAll(".option");
+  const q=questions[index];
+  const options=document.querySelectorAll(".option");
+  options.forEach(o=>o.onclick=null);
 
-  options.forEach(o => o.onclick = null);
-
-  if (i === q.answer) {
+  if(i===q.answer){
     div.classList.add("correct");
-  } else {
+  }else{
     div.classList.add("wrong");
     options[q.answer].classList.add("correct");
   }
 
-  const exp = document.getElementById("explanation");
-  exp.innerHTML = "<b>Explanation:</b> " + q.explanation;
-  exp.classList.remove("hidden");
+  const exp=document.getElementById("explanation");
+  exp.innerHTML="<b>Explanation:</b> "+q.explanation;
+  exp.style.display="block";
 }
 
-function nextQuestion() {
+function nextQuestion(){
   index++;
   showQuestion();
 }
 </script>
 
-</body>
-</html>
 </body>
 </html>
