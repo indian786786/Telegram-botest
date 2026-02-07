@@ -66,7 +66,7 @@ async function startQuiz() {
   document.getElementById("quiz").innerHTML = "Loading questions...";
   document.getElementById("explanation").innerHTML = "";
 
-  const res = await fetch("/api", {
+  const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ topic })
