@@ -1,59 +1,56 @@
-let currentQuestion = null;
-
 const startBtn = document.getElementById("startBtn");
 const nextBtn = document.getElementById("nextBtn");
-const output = document.getElementById("output");
 const topicInput = document.getElementById("topic");
+const output = document.getElementById("output");
 
-startBtn.addEventListener("click", loadQuestion);
-nextBtn.addEventListener("click", loadQuestion);
+let currentTopic = "";
 
-async function loadQuestion() {
-  const topic = topicInput.value.trim();
-
-  if (!topic) {
-    output.innerHTML = "❌ Please enter a topic";
+startBtn.onclick = () => {
+  currentTopic = topicInput.value.trim();
+  if (!currentTopic) {
+    alert("Enter a topic");
     return;
   }
+  loadQuestion();
+};
 
-  output.innerHTML = "⏳ Loading question...";
+nextBtn.onclick = () => {
+  if (!currentTopic) {
+    alert("Click Start first");
+    return;
+  }
+  loadQuestion();
+};
+
+async function loadQuestion() {
+  output.innerHTML = "Loading...";
 
   try {
-    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ topic }),
-    });
+    const res = await fetch(
+      "https://canvas-ai.saififiroza786.workers.dev/",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: currentTopic })
+      }
+    );
 
     const data = await res.json();
 
-    if (data.error) {
-      output.innerHTML = "❌ " + data.error;
-      return;
+    if (!data.question || !data.options) {
+      throw new Error("Invalid response");
     }
-
-    currentQuestion = data;
 
     output.innerHTML = `
       <h3>${data.question}</h3>
-      <button onclick="checkAnswer('A')">A. ${data.options.A}</button><br><br>
-      <button onclick="checkAnswer('B')">B. ${data.options.B}</button><br><br>
-      <button onclick="checkAnswer('C')">C. ${data.options.C}</button><br><br>
-      <button onclick="checkAnswer('D')">D. ${data.options.D}</button>
+
+      <button style="width:100%;margin:5px">${data.options.A}</button>
+      <button style="width:100%;margin:5px">${data.options.B}</button>
+      <button style="width:100%;margin:5px">${data.options.C}</button>
+      <button style="width:100%;margin:5px">${data.options.D}</button>
     `;
   } catch (err) {
+    console.error(err);
     output.innerHTML = "❌ Error loading question";
-  }
-}
-
-function checkAnswer(choice) {
-  if (!currentQuestion) return;
-
-  if (choice === currentQuestion.answer) {
-    alert("✅ Correct!");
-  } else {
-    alert("❌ Wrong! Correct answer is " + currentQuestion.answer);
   }
 }
