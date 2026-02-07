@@ -21,7 +21,8 @@ async function loadQuestion() {
       body: JSON.stringify({ prompt: topic })
     });
 
-    const data = await res.json(); // SAFE now
+    const text = await res.text();        // 🔥 KEY CHANGE
+    const data = JSON.parse(text);        // 🔥 TELEGRAM-SAFE
 
     output.innerHTML = `
       <b>${data.question}</b><br><br>
