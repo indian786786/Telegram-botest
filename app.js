@@ -2,6 +2,11 @@ const API_URL = "https://canvas-ai.saififiroza786.workers.dev/";
 
 let currentTopic = "";
 
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("startBtn").addEventListener("click", startQuiz);
+  document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+});
+
 async function startQuiz() {
   const topicInput = document.getElementById("topic").value.trim();
 
@@ -49,8 +54,7 @@ async function loadQuestion() {
       <p>D. ${data.options.D}</p>
       <p><b>Answer:</b> ${data.answer}</p>
     `;
-
-  } catch (err) {
+  } catch (e) {
     output.innerHTML = "Error loading question";
   }
 }
