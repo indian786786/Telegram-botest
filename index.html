@@ -1,153 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>SSC Practice MCQ</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-body{
-  background:#0b1c3a;
-  color:white;
-  font-family:Arial, sans-serif;
-  padding:20px;
-}
-input, button{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  font-size:16px;
-}
-.option{
-  border:1px solid #555;
-  padding:12px;
-  margin-top:10px;
-  cursor:pointer;
-  border-radius:6px;
-}
-.correct{ background:#1f7a1f; }
-.wrong{ background:#7a1f1f; }
-#error{ color:#ff4d4d; margin-top:10px; }
-#explanation{
-  margin-top:15px;
-  background:#111;
-  padding:12px;
-  display:none;
-  border-left:4px solid #3aa0ff;
-}
-</style>
-</head>
-
-<body>
-
-<h2>SSC Practice MCQ</h2>
-
-<input id="topic" placeholder="Enter topic (e.g. Lodi dynasty)">
-<button onclick="startQuiz()">Start</button>
-<button onclick="nextQuestion()">Skip / Next</button>
-
-<div id="error"></div>
-<div id="quiz"></div>
-<div id="explanation"></div>
-
 <script>
 let questions = [];
 let index = 0;
 let answered = false;
 
-async function startQuiz(){
-  index = 0;
-  answered = false;
-  document.getElementById("quiz").innerHTML = "Loading questions...";
-  document.getElementById("explanation").style.display="none";
-  document.getElementById("error").innerText="";
-
+async function start() {
   const topic = document.getElementById("topic").value.trim();
+  document.getElementById("quiz").innerHTML = "Loading questions...";
+  document.getElementById("explanation").classList.add("hidden");
 
-  // ✅ Topic validation
-  if(topic.length < 3){
-    document.getElementById("quiz").innerHTML = "";
-    document.getElementById("error").innerText =
-      "❌ Please enter a valid topic (e.g. Lodi dynasty, Akbar, Physics)";
-    return;
-  }
-
-  try{
-    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
+  try {
+    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ topic })
     });
 
-    if(!res.ok){
-      throw new Error("Worker returned " + res.status);
+    if (!res.ok) throw new Error("Fetch failed");
+
+    questions = await res.json();
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+      throw new Error("Invalid question format");
     }
 
-    const data = await res.json();
-
-    if(!Array.isArray(data) || data.length === 0){
-      throw new Error("No questions received");
-    }
-
-    questions = data;
+    index = 0;
     showQuestion();
 
-  }catch(e){
-    document.getElementById("quiz").innerHTML = "";
-    document.getElementById("error").innerText =
+  } catch (e) {
+    console.error(e);
+    document.getElementById("quiz").innerHTML =
       "❌ Failed to load questions. Try a clear SSC topic.";
-    console.error("FETCH ERROR:", e);
   }
 }
 
-function showQuestion(){
-  answered=false;
-  const quiz=document.getElementById("quiz");
-  const exp=document.getElementById("explanation");
-  exp.style.display="none";
+function showQuestion() {
+  answered = false;
+  const quiz = document.getElementById("quiz");
+  const exp = document.getElementById("explanation");
+  exp.classList.add("hidden");
 
-  if(index >= questions.length){
-    quiz.innerHTML="✅ Quiz completed";
+  if (index >= questions.length) {
+    quiz.innerHTML = "✅ Quiz completed";
     return;
   }
 
-  const q=questions[index];
-  quiz.innerHTML=`<h3>Q${index+1}. ${q.question}</h3>`;
+  const q = questions[index];
+  quiz.innerHTML = `<h3>Q${index + 1}. ${q.question}</h3>`;
 
-  q.options.forEach((opt,i)=>{
-    const div=document.createElement("div");
-    div.className="option";
-    div.innerText=opt;
-    div.onclick=()=>checkAnswer(div,i);
+  q.options.forEach((opt, i) => {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = opt;
+    div.onclick = () => checkAnswer(div, i);
     quiz.appendChild(div);
   });
 }
 
-function checkAnswer(div,i){
-  if(answered) return;
-  answered=true;
+function checkAnswer(div, i) {
+  if (answered) return;
+  answered = true;
 
-  const q=questions[index];
-  const options=document.querySelectorAll(".option");
-  options.forEach(o=>o.onclick=null);
+  const q = questions[index];
+  const options = document.querySelectorAll(".option");
 
-  if(i===q.answer){
+  options.forEach(o => o.onclick = null);
+
+  if (i === q.answer) {
     div.classList.add("correct");
-  }else{
+  } else {
     div.classList.add("wrong");
     options[q.answer].classList.add("correct");
   }
 
-  const exp=document.getElementById("explanation");
-  exp.innerHTML="<b>Explanation:</b> "+q.explanation;
-  exp.style.display="block";
+  const exp = document.getElementById("explanation");
+  exp.innerHTML = `<b>Explanation:</b> ${q.explanation}`;
+  exp.classList.remove("hidden");
 }
 
-function nextQuestion(){
+function nextQuestion() {
   index++;
   showQuestion();
 }
 </script>
-
-</body>
-</html>
