@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>SSC MCQ Canvas</title>
-  <style>
-    body { font-family: Arial; padding: 10px; }
-    button { margin: 6px 0; padding: 10px; width: 100%; }
-    .correct { background-color: #c8f7c5; }
-    .wrong { background-color: #f7c5c5; }
-  </style>
+  <meta charset="UTF-8">
+  <title>SSC Practice MCQ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
-<body>
+<body style="font-family: Arial; background:#0f172a; color:white; padding:20px">
+
   <h2>SSC Practice</h2>
 
-  <input id="topic" placeholder="Enter topic (e.g. भारतीय संविधान)" style="width:100%; padding:8px" />
+  <input
+    id="topic"
+    placeholder="Enter topic (e.g. Lodi dynasty)"
+    style="width:100%; padding:12px; font-size:16px"
+  />
+
   <br><br>
 
-  <button onclick="start()">Start</button>
-  <button onclick="nextQuestion()">Next Question</button>
+  <button onclick="startQuiz()" style="width:100%; padding:12px">
+    Start
+  </button>
 
-  <div id="canvas" style="margin-top:20px"></div>
+  <br><br>
+
+  <button onclick="nextQuestion()" style="width:100%; padding:12px">
+    Next Question
+  </button>
+
+  <br><br>
+
+  <div id="output"></div>
 
   <script src="app.js"></script>
 </body>
