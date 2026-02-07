@@ -1,52 +1,114 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>SSC Practice MCQ</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      background:#0b1736;
-      color:white;
-      font-family:Arial;
-      padding:20px;
-    }
-    input, button {
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      font-size:16px;
-    }
-    .option {
-      border:1px solid #ccc;
-      padding:12px;
-      margin-top:8px;
-      cursor:pointer;
-      background:#111;
-    }
-    .correct { background:#0f5132; }
-    .wrong { background:#842029; }
-    .disabled { pointer-events:none; opacity:0.7; }
-    #explanation {
-      margin-top:15px;
-      padding:12px;
-      background:#111;
-      border-left:4px solid #0d6efd;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>SSC Practice MCQ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  background:#0b1533;
+  color:white;
+  font-family:Arial;
+  padding:20px;
+}
+button {
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  font-size:16px;
+}
+.option {
+  background:#eee;
+  color:black;
+  border:none;
+}
+.correct { background:#2ecc71 !important; }
+.wrong { background:#e74c3c !important; }
+</style>
 </head>
+
 <body>
 
 <h2>SSC Practice</h2>
 
-<input id="topic" placeholder="Enter topic (e.g. Lodi dynasty)" />
-<button id="startBtn">Start</button>
-<button id="skipBtn" style="display:none;">Skip</button>
+<input id="topic" placeholder="Enter topic" style="width:100%;padding:12px;font-size:16px" />
 
+<button onclick="start()">Start</button>
+<button onclick="next()">Skip / Next</button>
+
+<div id="status"></div>
+<hr>
 <div id="quiz"></div>
-<div id="explanation"></div>
-<button id="nextBtn" style="display:none;">Next Question</button>
 
-<script src="app.js"></script>
+<script>
+const WORKER_URL = "PASTE_YOUR_WORKER_URL_HERE";
+
+let questions = [];
+let index = 0;
+let answered = false;
+
+async function start() {
+  document.getElementById("status").innerText = "Loading questions...";
+  document.getElementById("quiz").innerHTML = "";
+  index = 0;
+  answered = false;
+
+  const topic = document.getElementById("topic").value || "General Knowledge";
+
+  const res = await fetch(WORKER_URL, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ topic })
+  });
+
+  const data = await res.json();
+
+  if (!data.questions) {
+    document.getElementById("status").innerText = "Error loading questions";
+    return;
+  }
+
+  questions = data.questions;
+  document.getElementById("status").innerText = "";
+  render();
+}
+
+function render() {
+  answered = false;
+  const q = questions[index];
+  if (!q) return;
+
+  let html = `<h3>${q.question}</h3>`;
+  for (let k in q.options) {
+    html += `<button class="option" onclick="answer('${k}', this)">${k}. ${q.options[k]}</button>`;
+  }
+  html += `<p id="explain"></p>`;
+  document.getElementById("quiz").innerHTML = html;
+}
+
+function answer(choice, btn) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[index];
+  document.querySelectorAll(".option").forEach(b => {
+    if (b.innerText.startsWith(q.answer)) b.classList.add("correct");
+    else b.classList.add("wrong");
+  });
+
+  document.getElementById("explain").innerText = q.explanation;
+}
+
+function next() {
+  if (index < questions.length - 1) {
+    index++;
+    render();
+  } else {
+    document.getElementById("quiz").innerHTML = "<h3>Done ✔</h3>";
+  }
+}
+</script>
+
 </body>
 </html>
