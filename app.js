@@ -5,7 +5,7 @@ async function generate() {
   editor.textContent = "Thinking...";
 
   try {
-    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
+    const res = await fetch("https://canvas-ai-saififiroza786.workers.dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
