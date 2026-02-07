@@ -1,56 +1,48 @@
+const API_URL = "https://canvas-ai.saififiroza786.workers.dev/";
+
 const startBtn = document.getElementById("startBtn");
 const nextBtn = document.getElementById("nextBtn");
-const topicInput = document.getElementById("topic");
 const output = document.getElementById("output");
-
-let currentTopic = "";
-
-startBtn.onclick = () => {
-  currentTopic = topicInput.value.trim();
-  if (!currentTopic) {
-    alert("Enter a topic");
-    return;
-  }
-  loadQuestion();
-};
-
-nextBtn.onclick = () => {
-  if (!currentTopic) {
-    alert("Click Start first");
-    return;
-  }
-  loadQuestion();
-};
+const topicInput = document.getElementById("topic");
 
 async function loadQuestion() {
-  output.innerHTML = "Loading...";
+  const topic = topicInput.value.trim();
+
+  if (!topic) {
+    output.innerHTML = "❌ Please enter a topic";
+    return;
+  }
+
+  output.innerHTML = "⏳ Loading question...";
 
   try {
-    const res = await fetch(
-      "https://canvas-ai.saififiroza786.workers.dev/",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: currentTopic })
-      }
-    );
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ topic })
+    });
 
     const data = await res.json();
 
+    // 🔴 THIS WAS FAILING BEFORE
     if (!data.question || !data.options) {
       throw new Error("Invalid response");
     }
 
     output.innerHTML = `
       <h3>${data.question}</h3>
-
-      <button style="width:100%;margin:5px">${data.options.A}</button>
-      <button style="width:100%;margin:5px">${data.options.B}</button>
-      <button style="width:100%;margin:5px">${data.options.C}</button>
-      <button style="width:100%;margin:5px">${data.options.D}</button>
+      <p>A. ${data.options.A}</p>
+      <p>B. ${data.options.B}</p>
+      <p>C. ${data.options.C}</p>
+      <p>D. ${data.options.D}</p>
     `;
   } catch (err) {
-    console.error(err);
     output.innerHTML = "❌ Error loading question";
+    console.error(err);
   }
 }
+
+startBtn.addEventListener("click", loadQuestion);
+nextBtn.addEventListener("click", loadQuestion);
