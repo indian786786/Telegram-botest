@@ -1,31 +1,53 @@
 async function generate() {
-  const prompt = document.getElementById("prompt").value;
+  const topic = document.getElementById("prompt").value.trim();
   const editor = document.getElementById("editor");
 
-  editor.textContent = "Thinking...\n";
+  editor.innerHTML = "Loading question...";
 
   try {
     const res = await fetch(
       "https://canvas-ai.saififiroza786.workers.dev/",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic }),
       }
     );
 
-    const data = await res.json();
+    const q = await res.json();
 
-    if (data.text) {
-      editor.textContent = data.text;
-    } else if (data.error) {
-      editor.textContent = "AI Error: " + data.error;
-    } else {
-      editor.textContent = "No reply from AI";
-    }
-  } catch (e) {
-    editor.textContent = "Network error: " + e.message;
+    editor.innerHTML = `
+      <h3>${q.question}</h3>
+
+      <button onclick="check('A','${q.answer}','${q.explanation}')">
+        A. ${q.options.A}
+      </button><br>
+
+      <button onclick="check('B','${q.answer}','${q.explanation}')">
+        B. ${q.options.B}
+      </button><br>
+
+      <button onclick="check('C','${q.answer}','${q.explanation}')">
+        C. ${q.options.C}
+      </button><br>
+
+      <button onclick="check('D','${q.answer}','${q.explanation}')">
+        D. ${q.options.D}
+      </button>
+    `;
+  } catch {
+    editor.innerText = "Error loading question";
   }
+}
+
+function check(selected, correct, explanation) {
+  const editor = document.getElementById("editor");
+
+  if (selected === correct) {
+    editor.innerHTML += `<p style="color:green">✔ Right Answer</p>`;
+  } else {
+    editor.innerHTML += `<p style="color:red">✘ Wrong Answer</p>`;
+  }
+
+  editor.innerHTML += `<p><b>Explanation:</b> ${explanation}</p>`;
 }
