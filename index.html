@@ -53,11 +53,11 @@ async function start() {
   document.getElementById("log").innerText = "";
 
   try {
-    const res = await fetch(WORKER_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic })
-    });
+    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ topic })
+});
 
     const text = await res.text();
     document.getElementById("log").innerText =
