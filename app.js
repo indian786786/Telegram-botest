@@ -1,42 +1,88 @@
-const API_URL = "https://canvas-ai.saififiroza786.workers.dev/";
+let questions = [];
+let index = 0;
+let answered = false;
 
-const startBtn = document.getElementById("startBtn");
+const quiz = document.getElementById("quiz");
+const explanation = document.getElementById("explanation");
 const nextBtn = document.getElementById("nextBtn");
-const output = document.getElementById("output");
-const topicInput = document.getElementById("topic");
+const skipBtn = document.getElementById("skipBtn");
 
-async function loadQuestion() {
-  const topic = topicInput.value.trim();
-  if (!topic) {
-    output.innerHTML = "❌ Enter a topic";
-    return;
-  }
+document.getElementById("startBtn").onclick = async () => {
+  const topic = document.getElementById("topic").value.trim();
+  if (!topic) return alert("Enter a topic");
 
-  output.innerHTML = "⏳ Loading...";
+  quiz.innerHTML = "Loading questions...";
+  explanation.innerHTML = "";
+  nextBtn.style.display = "none";
+  skipBtn.style.display = "block";
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: topic })
-    });
+  const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic })
+  });
 
-    const text = await res.text();        // 🔥 KEY CHANGE
-    const data = JSON.parse(text);        // 🔥 TELEGRAM-SAFE
+  const data = await res.json();
+  questions = data.questions;
+  index = 0;
+  showQuestion();
+};
 
-    output.innerHTML = `
-      <b>${data.question}</b><br><br>
-      A. ${data.options.A}<br>
-      B. ${data.options.B}<br>
-      C. ${data.options.C}<br>
-      D. ${data.options.D}<br><br>
-      <i>Answer: ${data.answer}</i>
-    `;
-  } catch (err) {
-    console.error(err);
-    output.innerHTML = "❌ Error loading question";
+function showQuestion() {
+  answered = false;
+  explanation.innerHTML = "";
+  nextBtn.style.display = "none";
+
+  const q = questions[index];
+  quiz.innerHTML = `<h3>${index+1}. ${q.question}</h3>`;
+
+  for (let key in q.options) {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = `${key}. ${q.options[key]}`;
+    div.onclick = () => selectOption(div, key);
+    quiz.appendChild(div);
   }
 }
 
-startBtn.onclick = loadQuestion;
-nextBtn.onclick = loadQuestion;
+function selectOption(div, key) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[index];
+  document.querySelectorAll(".option").forEach(o => o.classList.add("disabled"));
+
+  if (key === q.answer) {
+    div.classList.add("correct");
+  } else {
+    div.classList.add("wrong");
+    document.querySelectorAll(".option").forEach(o => {
+      if (o.innerText.startsWith(q.answer)) o.classList.add("correct");
+    });
+  }
+
+  explanation.innerHTML = `<strong>Explanation:</strong><br>${q.explanation}`;
+  nextBtn.style.display = "block";
+}
+
+nextBtn.onclick = () => {
+  index++;
+  if (index < questions.length) {
+    showQuestion();
+  } else {
+    quiz.innerHTML = "<h3>✅ Test completed</h3>";
+    explanation.innerHTML = "";
+    nextBtn.style.display = "none";
+    skipBtn.style.display = "none";
+  }
+};
+
+skipBtn.onclick = () => {
+  index++;
+  if (index < questions.length) {
+    showQuestion();
+  } else {
+    quiz.innerHTML = "<h3>✅ Test completed</h3>";
+    skipBtn.style.display = "none";
+  }
+};
