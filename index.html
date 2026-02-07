@@ -1,6 +1,28 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Telegram Canvas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-<h1>Canvas works</h1>
+  <header>Telegram Canvas</header>
+
+  <div class="container">
+    <div class="left">
+      <p>Prompt</p>
+      <textarea id="prompt">Write something about AI</textarea>
+      <button onclick="generate()">Generate</button>
+    </div>
+
+    <div class="right">
+      <div id="editor" class="editor">
+Tap Generate to see text appear here…
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
