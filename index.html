@@ -27,6 +27,7 @@ input, button{
 }
 .correct{ background:#1f7a1f; }
 .wrong{ background:#7a1f1f; }
+#error{ color:#ff4d4d; margin-top:10px; }
 #explanation{
   margin-top:15px;
   background:#111;
@@ -45,6 +46,7 @@ input, button{
 <button onclick="startQuiz()">Start</button>
 <button onclick="nextQuestion()">Skip / Next</button>
 
+<div id="error"></div>
 <div id="quiz"></div>
 <div id="explanation"></div>
 
@@ -55,12 +57,18 @@ let answered = false;
 
 async function startQuiz(){
   index = 0;
+  answered = false;
   document.getElementById("quiz").innerHTML = "Loading questions...";
   document.getElementById("explanation").style.display="none";
+  document.getElementById("error").innerText="";
 
   const topic = document.getElementById("topic").value.trim();
-  if(!topic){
-    document.getElementById("quiz").innerHTML = "❌ Please enter a topic";
+
+  // ✅ Topic validation
+  if(topic.length < 3){
+    document.getElementById("quiz").innerHTML = "";
+    document.getElementById("error").innerText =
+      "❌ Please enter a valid topic (e.g. Lodi dynasty, Akbar, Physics)";
     return;
   }
 
@@ -71,12 +79,24 @@ async function startQuiz(){
       body: JSON.stringify({ topic })
     });
 
-    questions = await res.json();
+    if(!res.ok){
+      throw new Error("Worker returned " + res.status);
+    }
+
+    const data = await res.json();
+
+    if(!Array.isArray(data) || data.length === 0){
+      throw new Error("No questions received");
+    }
+
+    questions = data;
     showQuestion();
 
   }catch(e){
-    document.getElementById("quiz").innerHTML="❌ Error loading questions";
-    console.error(e);
+    document.getElementById("quiz").innerHTML = "";
+    document.getElementById("error").innerText =
+      "❌ Failed to load questions. Try a clear SSC topic.";
+    console.error("FETCH ERROR:", e);
   }
 }
 
