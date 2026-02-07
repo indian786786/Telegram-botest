@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>SSC Practice MCQ</title>
@@ -8,28 +8,28 @@
 <style>
 body {
   font-family: Arial, sans-serif;
-  background:#0b1535;
-  color:white;
-  padding:20px;
+  background: #0b1535;
+  color: white;
+  padding: 20px;
 }
 input, button {
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  font-size:16px;
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  font-size: 16px;
 }
 .option {
-  padding:12px;
-  border:1px solid #555;
-  margin-top:10px;
-  cursor:pointer;
+  padding: 12px;
+  border: 1px solid #777;
+  margin-top: 10px;
+  cursor: pointer;
 }
-.correct { background:#1f8f3a; }
-.wrong { background:#b30000; }
+.correct { background: #1f8f3a; }
+.wrong { background: #b30000; }
 #explanation {
-  margin-top:15px;
-  padding:12px;
-  background:#111;
+  margin-top: 15px;
+  padding: 12px;
+  background: #111;
 }
 </style>
 </head>
@@ -49,8 +49,8 @@ input, button {
 <div id="explanation"></div>
 
 <script>
-let index = 0;
 let questions = [];
+let index = 0;
 
 function startQuiz() {
   const topic = document.getElementById("topic").value || "General Knowledge";
@@ -68,12 +68,6 @@ function startQuiz() {
       explain: `${topic} is important for SSC exams due to its historical relevance.`
     },
     {
-      q: `Which field is ${topic} most related to?`,
-      options: ["History", "Physics", "Chemistry", "Biology"],
-      answer: 0,
-      explain: `${topic} belongs mainly to the field of History.`
-    },
-    {
       q: `Why is ${topic} important for SSC exams?`,
       options: [
         "Frequently asked in exams",
@@ -83,6 +77,17 @@ function startQuiz() {
       ],
       answer: 0,
       explain: `${topic} is frequently asked in SSC exams.`
+    },
+    {
+      q: `Which field does ${topic} belong to?`,
+      options: [
+        "History",
+        "Physics",
+        "Chemistry",
+        "Biology"
+      ],
+      answer: 0,
+      explain: `${topic} mainly belongs to History.`
     }
   ];
 
@@ -105,6 +110,34 @@ function showQuestion() {
     div.onclick = () => checkAnswer(div, i);
     optionsDiv.appendChild(div);
   });
+}
+
+function checkAnswer(div, i) {
+  const q = questions[index];
+  const all = document.querySelectorAll(".option");
+
+  all.forEach(o => o.onclick = null);
+
+  if (i === q.answer) {
+    div.classList.add("correct");
+  } else {
+    div.classList.add("wrong");
+    all[q.answer].classList.add("correct");
+  }
+
+  document.getElementById("explanation").innerHTML =
+    `<b>Explanation:</b><br>${q.explain}`;
+}
+
+function nextQuestion() {
+  if (questions.length === 0) return;
+  index = (index + 1) % questions.length;
+  showQuestion();
+}
+</script>
+
+</body>
+</html>  });
 }
 
 function checkAnswer(div, i) {
