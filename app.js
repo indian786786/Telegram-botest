@@ -1,6 +1,11 @@
 async function generate() {
-  const topic = document.getElementById("prompt").value;
+  const topic = document.getElementById("prompt").value.trim();
   const output = document.getElementById("editor");
+
+  if (!topic) {
+    output.innerHTML = "Please enter a topic";
+    return;
+  }
 
   output.innerHTML = "Loading question...";
 
@@ -15,15 +20,13 @@ async function generate() {
 
     output.innerHTML = `
       <h3>${data.question}</h3>
-      <ul>
-        <li>A. ${data.options.A}</li>
-        <li>B. ${data.options.B}</li>
-        <li>C. ${data.options.C}</li>
-        <li>D. ${data.options.D}</li>
-      </ul>
+      <button>A. ${data.options.A}</button><br><br>
+      <button>B. ${data.options.B}</button><br><br>
+      <button>C. ${data.options.C}</button><br><br>
+      <button>D. ${data.options.D}</button>
     `;
 
-  } catch (e) {
+  } catch (err) {
     output.innerHTML = "Error loading question";
   }
 }
