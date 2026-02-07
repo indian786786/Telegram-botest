@@ -12,109 +12,96 @@ body {
   font-family:Arial;
   padding:20px;
 }
-h1 { text-align:center; }
-
-input, button {
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  font-size:16px;
-  border:none;
-  border-radius:6px;
-}
-
 .option {
   border:1px solid #444;
   padding:12px;
   margin-top:10px;
-  border-radius:6px;
   cursor:pointer;
 }
-
 .correct { background:#1e7f3b; }
 .wrong { background:#8b1e1e; }
-
-#explanation {
-  margin-top:15px;
-  padding:12px;
+#log {
   background:#111;
-  border-left:4px solid #00c3ff;
+  padding:10px;
+  margin-top:10px;
+  white-space:pre-wrap;
+  font-size:13px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>SSC Practice MCQ</h1>
+<h2>SSC Practice MCQ (Diagnostic)</h2>
 
 <input id="topic" placeholder="Enter topic (e.g. Lodi dynasty)">
-<button onclick="startQuiz()">Start</button>
-<button onclick="nextQuestion()">Skip / Next</button>
+<button onclick="start()">Start</button>
 
 <div id="quiz"></div>
 <div id="explanation"></div>
+<div id="log"></div>
 
 <script>
+const WORKER_URL = "https://canvas-ai.saififiroza786.workers.dev/";
+
 let questions = [];
 let index = 0;
-let locked = false;
 
-async function startQuiz() {
+async function start() {
   const topic = document.getElementById("topic").value.trim();
-  if (!topic) return alert("Enter a topic");
-
   document.getElementById("quiz").innerHTML = "Loading questions...";
-  document.getElementById("explanation").innerHTML = "";
+  document.getElementById("log").innerText = "";
 
-  const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topic })
-  });
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ topic })
+    });
 
-  questions = await res.json();
-  index = 0;
-  showQuestion();
+    const text = await res.text();
+    document.getElementById("log").innerText =
+      "RAW RESPONSE:\\n" + text;
+
+    const data = JSON.parse(text);
+    questions = data;
+    index = 0;
+    show();
+  } catch (e) {
+    document.getElementById("quiz").innerHTML = "❌ Error";
+    document.getElementById("log").innerText +=
+      "\\nERROR:\\n" + e.message;
+  }
 }
 
-function showQuestion() {
-  locked = false;
+function show() {
   const q = questions[index];
   if (!q) {
-    document.getElementById("quiz").innerHTML = "Quiz Completed ✔";
+    document.getElementById("quiz").innerHTML = "No questions found";
     return;
   }
 
-  let html = `<h3>Q${index + 1}. ${q.question}</h3>`;
-  q.options.forEach((o, i) => {
-    html += `<div class="option" onclick="checkAnswer(this, ${i})">${o}</div>`;
+  let html = `<h3>${q.question}</h3>`;
+  q.options.forEach((o,i)=>{
+    html += `<div class="option" onclick="ans(${i})">${o}</div>`;
   });
-
   document.getElementById("quiz").innerHTML = html;
-  document.getElementById("explanation").innerHTML = "";
 }
 
-function checkAnswer(div, i) {
-  if (locked) return;
-  locked = true;
-
+function ans(i) {
   const q = questions[index];
-  const all = document.querySelectorAll(".option");
+  const opts = document.querySelectorAll(".option");
+  opts.forEach(o=>o.onclick=null);
 
   if (i === q.answer) {
-    div.classList.add("correct");
+    opts[i].classList.add("correct");
   } else {
-    div.classList.add("wrong");
-    all[q.answer].classList.add("correct");
+    opts[i].classList.add("wrong");
+    opts[q.answer].classList.add("correct");
   }
 
   document.getElementById("explanation").innerHTML =
     "<b>Explanation:</b> " + q.explanation;
-}
-
-function nextQuestion() {
-  index++;
-  showQuestion();
 }
 </script>
 
