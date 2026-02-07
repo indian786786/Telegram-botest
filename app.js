@@ -1,65 +1,47 @@
-let currentTopic = "";
-let correctAnswer = "";
-
-async function start() {
-  const topicInput = document.getElementById("topic");
-  currentTopic = topicInput.value.trim();
-  if (!currentTopic) {
-    alert("Please enter a topic");
-    return;
-  }
-  loadQuestion();
-}
-
-async function nextQuestion() {
-  if (!currentTopic) {
-    alert("Start first");
-    return;
-  }
-  loadQuestion();
-}
+let currentAnswer = "";
 
 async function loadQuestion() {
-  const canvas = document.getElementById("canvas");
-  canvas.innerHTML = "Loading question...";
+  const topic = document.getElementById("topic").value;
+  const questionBox = document.getElementById("question");
+  const optionsBox = document.getElementById("options");
+
+  questionBox.innerText = "Loading...";
+  optionsBox.innerHTML = "";
 
   try {
-    const res = await fetch(
-      "https://canvas-ai.saififiroza786.workers.dev/",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: currentTopic })
-      }
-    );
+    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: topic })
+    });
 
-    const q = await res.json();
-    correctAnswer = q.answer;
+    const q = await res.json(); // ✅ MUST be json()
 
-    canvas.innerHTML = `
-      <h3>${q.question}</h3>
+    currentAnswer = q.answer;
 
-      ${optionButton("A", q.options.A)}
-      ${optionButton("B", q.options.B)}
-      ${optionButton("C", q.options.C)}
-      ${optionButton("D", q.options.D)}
-    `;
+    questionBox.innerText = q.question;
+
+    for (const key in q.options) {
+      const btn = document.createElement("button");
+      btn.innerText = `${key}. ${q.options[key]}`;
+      btn.onclick = () => checkAnswer(key, btn);
+      optionsBox.appendChild(btn);
+    }
+
   } catch (e) {
-    canvas.innerHTML = "Error loading question";
+    questionBox.innerText = "Error loading question";
+    console.error(e);
   }
-}
-
-function optionButton(letter, text) {
-  return `<button onclick="checkAnswer('${letter}', this)">${letter}. ${text}</button>`;
 }
 
 function checkAnswer(selected, btn) {
-  const buttons = document.querySelectorAll("#canvas button");
+  const buttons = document.querySelectorAll("#options button");
+
   buttons.forEach(b => b.disabled = true);
 
-  if (selected === correctAnswer) {
-    btn.classList.add("correct");
+  if (selected === currentAnswer) {
+    btn.style.background = "green";
   } else {
-    btn.classList.add("wrong");
+    btn.style.background = "red";
   }
 }
