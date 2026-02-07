@@ -7,33 +7,33 @@ const topicInput = document.getElementById("topic");
 
 async function loadQuestion() {
   const topic = topicInput.value.trim();
-
   if (!topic) {
-    output.innerHTML = "❌ Please enter a topic";
+    output.innerHTML = "❌ Enter a topic";
     return;
   }
 
-  output.innerHTML = "⏳ Generating MCQ...";
+  output.innerHTML = "⏳ Loading...";
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt: `Generate ONE SSC-style MCQ with 4 options on the topic: ${topic}`
-      })
+      body: JSON.stringify({ prompt: topic })
     });
 
-    const text = await res.text();
+    const data = await res.json(); // SAFE now
 
     output.innerHTML = `
-      <pre style="white-space:pre-wrap; background:#020617; padding:15px; border-radius:8px">
-${text}
-      </pre>
+      <b>${data.question}</b><br><br>
+      A. ${data.options.A}<br>
+      B. ${data.options.B}<br>
+      C. ${data.options.C}<br>
+      D. ${data.options.D}<br><br>
+      <i>Answer: ${data.answer}</i>
     `;
   } catch (err) {
     console.error(err);
-    output.innerHTML = "❌ Error connecting to AI";
+    output.innerHTML = "❌ Error loading question";
   }
 }
 
