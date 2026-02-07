@@ -1,16 +1,19 @@
-function generate() {
+async function generate() {
+  const prompt = document.getElementById("prompt").value;
   const editor = document.getElementById("editor");
-  editor.textContent = "";
 
-  const fakeAI =
-    "This is your Canvas.\n\n" +
-    "Text appears directly in the document.\n\n" +
-    "Next step: connect real AI.";
+  editor.textContent = "Thinking...\n\n";
 
-  let i = 0;
-  const interval = setInterval(() => {
-    editor.textContent += fakeAI[i];
-    i++;
-    if (i >= fakeAI.length) clearInterval(interval);
-  }, 25);
+  try {
+    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+
+    const data = await res.json();
+    editor.textContent = data.text || "No response from AI";
+  } catch (e) {
+    editor.textContent = "Error connecting to AI";
+  }
 }
