@@ -1,1 +1,172 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Quiz Application</title>\n    <link rel="stylesheet" href="style.css">\n    <script src="app.js" defer></script>\n</head>\n<body>\n    <div id="quiz-container">\n        <h1>Quiz Application</h1>\n        <label for="topic-input">Select a topic:</label>\n        <input type="text" id="topic-input" placeholder="Enter a topic...">\n        <button id="start-button">Start Quiz</button>\n        <div id="quiz-area">\n            <!-- Quiz questions will be populated here -->\n        </div>\n        <div id="explanation-area">\n            <!-- Explanations for answers will be shown here -->\n        </div>\n        <button id="skip-button">Skip</button>\n        <button id="next-button">Next</button>\n    </div>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SSC Practice MCQ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  background:#0b1c3a;
+  color:#ffffff;
+  font-family: Arial, sans-serif;
+  padding:20px;
+}
+
+h2 {
+  text-align:center;
+}
+
+input, button {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  font-size:16px;
+  border-radius:6px;
+  border:none;
+}
+
+button {
+  background:#e5e7eb;
+  cursor:pointer;
+}
+
+.option {
+  margin-top:12px;
+  padding:14px;
+  border:1px solid #555;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.correct {
+  background:#1f7a3a;
+}
+
+.wrong {
+  background:#8b1e1e;
+}
+
+#explanation {
+  margin-top:15px;
+  padding:12px;
+  background:#111;
+  border-left:4px solid #3aa0ff;
+  display:none;
+}
+
+#error {
+  margin-top:10px;
+  color:#ff6b6b;
+}
+</style>
+</head>
+
+<body>
+
+<h2>SSC Practice MCQ (PYQ Style)</h2>
+
+<input id="topic" placeholder="Enter topic (e.g. Lodi dynasty)">
+<button onclick="startQuiz()">Start</button>
+<button onclick="nextQuestion()">Skip / Next</button>
+
+<div id="error"></div>
+<div id="quiz"></div>
+<div id="explanation"></div>
+
+<script>
+let questions = [];
+let index = 0;
+let answered = false;
+
+async function startQuiz() {
+  const topic = document.getElementById("topic").value.trim();
+  document.getElementById("error").innerText = "";
+  document.getElementById("explanation").style.display = "none";
+  document.getElementById("quiz").innerHTML = "Loading SSC PYQ-style questions...";
+
+  if (topic.length < 3) {
+    document.getElementById("quiz").innerHTML = "";
+    document.getElementById("error").innerText =
+      "❌ Please enter a valid SSC topic (e.g. Lodi dynasty, Akbar, Physics)";
+    return;
+  }
+
+  try {
+    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ topic })
+    });
+
+    if (!res.ok) throw new Error("Network error");
+
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error("Invalid question format");
+    }
+
+    questions = data;
+    index = 0;
+    showQuestion();
+
+  } catch (err) {
+    document.getElementById("quiz").innerHTML = "";
+    document.getElementById("error").innerText =
+      "❌ Failed to load questions. Try a clear SSC topic.";
+    console.error(err);
+  }
+}
+
+function showQuestion() {
+  answered = false;
+  document.getElementById("explanation").style.display = "none";
+
+  if (index >= questions.length) {
+    document.getElementById("quiz").innerHTML = "✅ Quiz completed";
+    return;
+  }
+
+  const q = questions[index];
+  const quiz = document.getElementById("quiz");
+
+  quiz.innerHTML = `<h3>Q${index + 1}. ${q.question}</h3>`;
+
+  q.options.forEach((opt, i) => {
+    const div = document.createElement("div");
+    div.className = "option";
+    div.innerText = opt;
+    div.onclick = () => checkAnswer(div, i);
+    quiz.appendChild(div);
+  });
+}
+
+function checkAnswer(div, i) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[index];
+  const options = document.querySelectorAll(".option");
+  options.forEach(o => o.onclick = null);
+
+  if (i === q.answer) {
+    div.classList.add("correct");
+  } else {
+    div.classList.add("wrong");
+    options[q.answer].classList.add("correct");
+  }
+
+  const exp = document.getElementById("explanation");
+  exp.innerHTML = "<b>Explanation:</b> " + q.explanation;
+  exp.style.display = "block";
+}
+
+function nextQuestion() {
+  index++;
+  showQuestion();
+}
+</script>
+
+</body>
+</html>
