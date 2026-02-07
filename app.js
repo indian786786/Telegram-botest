@@ -2,12 +2,7 @@ async function generate() {
   const prompt = document.getElementById("prompt").value;
   const editor = document.getElementById("editor");
 
-  if (!prompt.trim()) {
-    editor.textContent = "Please enter a prompt.";
-    return;
-  }
-
-  editor.textContent = "Thinking...";
+  editor.textContent = "Thinking...\n";
 
   try {
     const res = await fetch(
@@ -21,15 +16,16 @@ async function generate() {
       }
     );
 
-    if (!res.ok) {
-      editor.textContent = "Server error: " + res.status;
-      return;
-    }
-
     const data = await res.json();
 
-    editor.textContent = data.text || "No response from AI";
-  } catch (err) {
-    editor.textContent = "Error connecting to AI";
+    if (data.text) {
+      editor.textContent = data.text;
+    } else if (data.error) {
+      editor.textContent = "AI Error: " + data.error;
+    } else {
+      editor.textContent = "No reply from AI";
+    }
+  } catch (e) {
+    editor.textContent = "Network error: " + e.message;
   }
 }
