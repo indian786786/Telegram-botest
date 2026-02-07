@@ -2,26 +2,25 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Telegram Canvas</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <title>SSC MCQ Canvas</title>
+  <style>
+    body { font-family: Arial; padding: 10px; }
+    button { margin: 6px 0; padding: 10px; width: 100%; }
+    .correct { background-color: #c8f7c5; }
+    .wrong { background-color: #f7c5c5; }
+  </style>
 </head>
+
 <body>
-  <header>Telegram Canvas</header>
+  <h2>SSC Practice</h2>
 
-  <div class="container">
-    <div class="left">
-      <p>Prompt</p>
-      <textarea id="prompt">Write something about AI</textarea>
-      <button onclick="generate()">Generate</button>
-    </div>
+  <input id="topic" placeholder="Enter topic (e.g. भारतीय संविधान)" style="width:100%; padding:8px" />
+  <br><br>
 
-    <div class="right">
-      <div id="editor" class="editor">
-Tap Generate to see text appear here…
-      </div>
-    </div>
-  </div>
+  <button onclick="start()">Start</button>
+  <button onclick="nextQuestion()">Next Question</button>
+
+  <div id="canvas" style="margin-top:20px"></div>
 
   <script src="app.js"></script>
 </body>
