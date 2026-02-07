@@ -1,29 +1,53 @@
-async function generate() {
-  const topic = document.getElementById("prompt").value.trim();
-  const output = document.getElementById("editor");
+const API_URL = "https://canvas-ai.saififiroza786.workers.dev/";
 
-  if (!topic) {
-    output.innerHTML = "Please enter a topic";
+let currentTopic = "";
+
+async function startQuiz() {
+  const topicInput = document.getElementById("topic").value.trim();
+
+  if (!topicInput) {
+    alert("Please enter a topic");
     return;
   }
 
+  currentTopic = topicInput;
+  loadQuestion();
+}
+
+async function nextQuestion() {
+  if (!currentTopic) {
+    alert("Start quiz first");
+    return;
+  }
+
+  loadQuestion();
+}
+
+async function loadQuestion() {
+  const output = document.getElementById("output");
   output.innerHTML = "Loading question...";
 
   try {
-    const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
+    const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic })
+      body: JSON.stringify({ topic: currentTopic })
     });
 
     const data = await res.json();
 
+    if (data.error) {
+      output.innerHTML = "Error: " + data.error;
+      return;
+    }
+
     output.innerHTML = `
       <h3>${data.question}</h3>
-      <button>A. ${data.options.A}</button><br><br>
-      <button>B. ${data.options.B}</button><br><br>
-      <button>C. ${data.options.C}</button><br><br>
-      <button>D. ${data.options.D}</button>
+      <p>A. ${data.options.A}</p>
+      <p>B. ${data.options.B}</p>
+      <p>C. ${data.options.C}</p>
+      <p>D. ${data.options.D}</p>
+      <p><b>Answer:</b> ${data.answer}</p>
     `;
 
   } catch (err) {
