@@ -13,36 +13,29 @@ async function loadQuestion() {
     return;
   }
 
-  output.innerHTML = "⏳ Loading question...";
+  output.innerHTML = "⏳ Generating MCQ...";
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ topic })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prompt: `Generate ONE SSC-style MCQ with 4 options on the topic: ${topic}`
+      })
     });
 
-    const data = await res.json();
-
-    // 🔴 THIS WAS FAILING BEFORE
-    if (!data.question || !data.options) {
-      throw new Error("Invalid response");
-    }
+    const text = await res.text();
 
     output.innerHTML = `
-      <h3>${data.question}</h3>
-      <p>A. ${data.options.A}</p>
-      <p>B. ${data.options.B}</p>
-      <p>C. ${data.options.C}</p>
-      <p>D. ${data.options.D}</p>
+      <pre style="white-space:pre-wrap; background:#020617; padding:15px; border-radius:8px">
+${text}
+      </pre>
     `;
   } catch (err) {
-    output.innerHTML = "❌ Error loading question";
     console.error(err);
+    output.innerHTML = "❌ Error connecting to AI";
   }
 }
 
-startBtn.addEventListener("click", loadQuestion);
-nextBtn.addEventListener("click", loadQuestion);
+startBtn.onclick = loadQuestion;
+nextBtn.onclick = loadQuestion;
