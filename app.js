@@ -1,8 +1,27 @@
-async function generate() {
-  const topic = document.getElementById("prompt").value.trim();
-  const editor = document.getElementById("editor");
+let currentTopic = "";
+let correctAnswer = "";
 
-  editor.innerHTML = "Loading question...";
+async function start() {
+  const topicInput = document.getElementById("topic");
+  currentTopic = topicInput.value.trim();
+  if (!currentTopic) {
+    alert("Please enter a topic");
+    return;
+  }
+  loadQuestion();
+}
+
+async function nextQuestion() {
+  if (!currentTopic) {
+    alert("Start first");
+    return;
+  }
+  loadQuestion();
+}
+
+async function loadQuestion() {
+  const canvas = document.getElementById("canvas");
+  canvas.innerHTML = "Loading question...";
 
   try {
     const res = await fetch(
@@ -10,44 +29,37 @@ async function generate() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic }),
+        body: JSON.stringify({ prompt: currentTopic })
       }
     );
 
     const q = await res.json();
+    correctAnswer = q.answer;
 
-    editor.innerHTML = `
+    canvas.innerHTML = `
       <h3>${q.question}</h3>
 
-      <button onclick="check('A','${q.answer}','${q.explanation}')">
-        A. ${q.options.A}
-      </button><br>
-
-      <button onclick="check('B','${q.answer}','${q.explanation}')">
-        B. ${q.options.B}
-      </button><br>
-
-      <button onclick="check('C','${q.answer}','${q.explanation}')">
-        C. ${q.options.C}
-      </button><br>
-
-      <button onclick="check('D','${q.answer}','${q.explanation}')">
-        D. ${q.options.D}
-      </button>
+      ${optionButton("A", q.options.A)}
+      ${optionButton("B", q.options.B)}
+      ${optionButton("C", q.options.C)}
+      ${optionButton("D", q.options.D)}
     `;
-  } catch {
-    editor.innerText = "Error loading question";
+  } catch (e) {
+    canvas.innerHTML = "Error loading question";
   }
 }
 
-function check(selected, correct, explanation) {
-  const editor = document.getElementById("editor");
+function optionButton(letter, text) {
+  return `<button onclick="checkAnswer('${letter}', this)">${letter}. ${text}</button>`;
+}
 
-  if (selected === correct) {
-    editor.innerHTML += `<p style="color:green">✔ Right Answer</p>`;
+function checkAnswer(selected, btn) {
+  const buttons = document.querySelectorAll("#canvas button");
+  buttons.forEach(b => b.disabled = true);
+
+  if (selected === correctAnswer) {
+    btn.classList.add("correct");
   } else {
-    editor.innerHTML += `<p style="color:red">✘ Wrong Answer</p>`;
+    btn.classList.add("wrong");
   }
-
-  editor.innerHTML += `<p><b>Explanation:</b> ${explanation}</p>`;
 }
