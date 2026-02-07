@@ -3,35 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <title>SSC Practice MCQ</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background:#0b1736;
+      color:white;
+      font-family:Arial;
+      padding:20px;
+    }
+    input, button {
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      font-size:16px;
+    }
+    .option {
+      border:1px solid #ccc;
+      padding:12px;
+      margin-top:8px;
+      cursor:pointer;
+      background:#111;
+    }
+    .correct { background:#0f5132; }
+    .wrong { background:#842029; }
+    .disabled { pointer-events:none; opacity:0.7; }
+    #explanation {
+      margin-top:15px;
+      padding:12px;
+      background:#111;
+      border-left:4px solid #0d6efd;
+    }
+  </style>
 </head>
+<body>
 
-<body style="font-family:Arial; background:#0f172a; color:white; padding:20px">
+<h2>SSC Practice</h2>
 
-  <h2>SSC Practice</h2>
+<input id="topic" placeholder="Enter topic (e.g. Lodi dynasty)" />
+<button id="startBtn">Start</button>
+<button id="skipBtn" style="display:none;">Skip</button>
 
-  <input
-    id="topic"
-    placeholder="Enter topic (e.g. Lodi dynasty)"
-    style="width:100%; padding:12px; font-size:16px"
-  />
+<div id="quiz"></div>
+<div id="explanation"></div>
+<button id="nextBtn" style="display:none;">Next Question</button>
 
-  <br><br>
-
-  <button id="startBtn" style="width:100%; padding:12px">
-    Start
-  </button>
-
-  <br><br>
-
-  <button id="nextBtn" style="width:100%; padding:12px">
-    Next Question
-  </button>
-
-  <br><br>
-
-  <div id="output"></div>
-
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
