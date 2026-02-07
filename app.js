@@ -1,17 +1,14 @@
 let currentQuestion = null;
 
-async function startQuiz() {
-  await loadQuestion();
-}
+const startBtn = document.getElementById("startBtn");
+const nextBtn = document.getElementById("nextBtn");
+const output = document.getElementById("output");
+const topicInput = document.getElementById("topic");
 
-async function nextQuestion() {
-  await loadQuestion();
-}
+startBtn.addEventListener("click", loadQuestion);
+nextBtn.addEventListener("click", loadQuestion);
 
 async function loadQuestion() {
-  const topicInput = document.getElementById("topic");
-  const output = document.getElementById("questionBox");
-
   const topic = topicInput.value.trim();
 
   if (!topic) {
@@ -25,9 +22,9 @@ async function loadQuestion() {
     const res = await fetch("https://canvas-ai.saififiroza786.workers.dev/", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ topic })   // ✅ FIX IS HERE
+      body: JSON.stringify({ topic }),
     });
 
     const data = await res.json();
@@ -46,20 +43,17 @@ async function loadQuestion() {
       <button onclick="checkAnswer('C')">C. ${data.options.C}</button><br><br>
       <button onclick="checkAnswer('D')">D. ${data.options.D}</button>
     `;
-
   } catch (err) {
     output.innerHTML = "❌ Error loading question";
   }
 }
 
-function checkAnswer(selected) {
+function checkAnswer(choice) {
   if (!currentQuestion) return;
 
-  const correct = currentQuestion.answer;
-
-  if (selected === correct) {
-    alert("✅ Correct Answer!");
+  if (choice === currentQuestion.answer) {
+    alert("✅ Correct!");
   } else {
-    alert("❌ Wrong! Correct answer is " + correct);
+    alert("❌ Wrong! Correct answer is " + currentQuestion.answer);
   }
 }
